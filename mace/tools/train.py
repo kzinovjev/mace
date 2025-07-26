@@ -136,6 +136,19 @@ def valid_err_log(
         logging.info(
             f"{inintial_phrase}: head: {valid_loader_name}, loss={valid_loss:8.8f}, RMSE_E_per_atom={error_e:8.2f} meV, RMSE_F={error_f:8.2f} meV / A, RMSE_Mu_per_atom={error_mu:8.2f} mDebye",
         )
+    elif log_errors == "EnergyMBISRMSE":
+        error_e = eval_metrics["rmse_e_per_atom"] * 1e3
+        error_f = eval_metrics["rmse_f"] * 1e3
+        error_s = eval_metrics["rmse_mbis_s"]
+        error_q = eval_metrics["rmse_mbis_q"]
+        error_mu = eval_metrics["rmse_mbis_mu"]
+        logging.info(
+            f"{inintial_phrase}: head: {valid_loader_name}, loss={valid_loss:8.8f}, "
+            f"RMSE_E_per_atom={error_e:8.2f} meV, RMSE_F={error_f:8.2f} meV / A, "
+            f"RMSE_mbis_s={error_s:7.4f} A, "
+            f"RMSE_mbis_q={error_q:7.4f} e, "
+            f"RMSE_mbis_mu={error_mu:7.4f} q * A"
+        )
 
 
 def train(
@@ -583,6 +596,17 @@ class MACELoss(Metric):
         self.add_state("mus", default=[], dist_reduce_fx="cat")
         self.add_state("delta_mus", default=[], dist_reduce_fx="cat")
         self.add_state("delta_mus_per_atom", default=[], dist_reduce_fx="cat")
+        self.add_state("valence_widths_computed", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("valence_widths", default=[], dist_reduce_fx="cat")
+        self.add_state("delta_valence_widths", default=[], dist_reduce_fx="cat")
+        self.add_state("charges_computed", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("charges", default=[], dist_reduce_fx="cat")
+        self.add_state("delta_charges", default=[], dist_reduce_fx="cat")
+        self.add_state("atomic_dipoles_computed", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("atomic_dipoles", default=[], dist_reduce_fx="cat")
+        self.add_state("delta_atomic_dipoles", default=[], dist_reduce_fx="cat")
+
+
 
     def update(self, batch, output):  # pylint: disable=arguments-differ
         loss = self.loss_fn(pred=output, ref=batch)
@@ -617,6 +641,18 @@ class MACELoss(Metric):
                 (batch.dipole - output["dipole"])
                 / (batch.ptr[1:] - batch.ptr[:-1]).unsqueeze(-1)
             )
+        if output.get("valence_widths") is not None and batch.valence_widths is not None:
+            self.valence_widths_computed += 1.0
+            self.valence_widths.append(batch.valence_widths)
+            self.delta_valence_widths.append(batch.valence_widths - output["valence_widths"])
+        if output.get("charges") is not None and batch.charges is not None:
+            self.charges_computed += 1.0
+            self.charges.append(batch.charges)
+            self.delta_charges.append(batch.charges - output["charges"])
+        if output.get("atomic_dipoles") is not None and batch.atomic_dipoles is not None:
+            self.atomic_dipoles_computed += 1.0
+            self.atomic_dipoles.append(batch.atomic_dipoles)
+            self.delta_atomic_dipoles.append(batch.atomic_dipoles - output["atomic_dipoles"])
 
     def convert(self, delta: Union[torch.Tensor, List[torch.Tensor]]) -> np.ndarray:
         if isinstance(delta, list):
@@ -665,5 +701,20 @@ class MACELoss(Metric):
             aux["rmse_mu_per_atom"] = compute_rmse(delta_mus_per_atom)
             aux["rel_rmse_mu"] = compute_rel_rmse(delta_mus, mus)
             aux["q95_mu"] = compute_q95(delta_mus)
+        if self.valence_widths_computed:
+            valence_widths = self.convert(self.valence_widths)
+            delta_valence_widths = self.convert(self.delta_valence_widths)
+            aux['rmse_mbis_s'] = compute_rmse(delta_valence_widths)
+            aux['rel_rmse_mbis_s'] = compute_rel_rmse(delta_valence_widths, valence_widths)
+        if self.charges_computed:
+            charges = self.convert(self.charges)
+            delta_charges = self.convert(self.delta_charges)
+            aux['rmse_mbis_q'] = compute_rmse(delta_charges)
+            aux['rel_rmse_mbis_q'] = compute_rel_rmse(delta_charges, charges)
+        if self.atomic_dipoles_computed:
+            atomic_dipoles = self.convert(self.atomic_dipoles)
+            delta_atomic_dipoles = self.convert(self.delta_atomic_dipoles)
+            aux['rmse_mbis_mu'] = compute_rmse(delta_atomic_dipoles)
+            aux['rel_rmse_mbis_mu'] = compute_rel_rmse(delta_atomic_dipoles, atomic_dipoles)
 
         return aux["loss"], aux

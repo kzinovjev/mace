@@ -37,6 +37,7 @@ def configure_model(
         "virials": compute_virials,
         "stress": compute_stress,
         "dipoles": args.compute_dipole,
+        "mbis": args.compute_mbis,
     }
     logging.info(
         f"During training the following quantities will be reported: {', '.join([f'{report}' for report, value in output_args.items() if value])}"
@@ -276,6 +277,22 @@ def _build_model(
             args.error_table == "EnergyDipoleRMSE"
         ), "Use error_table EnergyDipoleRMSE with AtomicDipolesMACE model"
         return modules.EnergyDipolesMACE(
+            **model_config,
+            correlation=args.correlation,
+            gate=modules.gate_dict[args.gate],
+            interaction_cls_first=modules.interaction_classes[
+                "RealAgnosticInteractionBlock"
+            ],
+            MLP_irreps=o3.Irreps(args.MLP_irreps),
+        )
+    if args.model == "EnergyMBISMACE":
+        assert (
+            args.loss == "energy_mbis"
+        ), "Use energy_mbis loss with EnergyMBISMACE model"
+        assert (
+            args.error_table == "EnergyMBISRMSE"
+        ), "Use error_table EnergyMBISRMSE with EnergyMBISMACE model"
+        return modules.EnergyMBISMACE(
             **model_config,
             correlation=args.correlation,
             gate=modules.gate_dict[args.gate],

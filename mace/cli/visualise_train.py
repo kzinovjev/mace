@@ -90,6 +90,19 @@ error_type = {
             ("dipole", "Dipole per atom [Debye]"),
         ],
     ),
+    "MBISRMSE": (
+        [
+            ("rmse_mbis_s", "RMSE s/atom [A]"),
+            ("rmse_mbis_q", "RMSE q/atom [e]"),
+            ("rmse_mbis_mu", "RMSE mu/atom [e * A]"),
+
+        ],
+        [
+            ("Valence width", "Atomic valence width [A]"),
+            ("Atomic charge", "Atomic charge [e]"),
+            ("Atomic dipole", "Atomic dipole [e * A]"),
+        ],
+    )
 }
 
 

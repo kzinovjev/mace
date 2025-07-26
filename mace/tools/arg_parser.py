@@ -117,6 +117,7 @@ def build_default_arg_parser() -> argparse.ArgumentParser:
             "DipoleRMSE",
             "DipoleMAE",
             "EnergyDipoleRMSE",
+            "EnergyMBISRMSE",
         ],
         default="PerAtomRMSE",
     )
@@ -133,6 +134,7 @@ def build_default_arg_parser() -> argparse.ArgumentParser:
             "ScaleShiftBOTNet",
             "AtomicDipolesMACE",
             "EnergyDipolesMACE",
+            "EnergyMBISMACE",
         ],
     )
     parser.add_argument(
@@ -514,10 +516,22 @@ def build_default_arg_parser() -> argparse.ArgumentParser:
         default=DefaultKeys.HEAD.value,
     )
     parser.add_argument(
+        "--valence_widths_key",
+        help="Key of valence widths in training xyz",
+        type=str,
+        default=DefaultKeys.VALENCE_WIDTHS.value,
+    )
+    parser.add_argument(
         "--charges_key",
         help="Key of atomic charges in training xyz",
         type=str,
         default=DefaultKeys.CHARGES.value,
+    )
+    parser.add_argument(
+        "--atomic_dipoles_key",
+        help="Key of atomic dipoles in training xyz",
+        type=str,
+        default=DefaultKeys.ATOMIC_DIPOLES.value,
     )
     parser.add_argument(
         "--elec_temp_key",
@@ -582,6 +596,7 @@ def build_default_arg_parser() -> argparse.ArgumentParser:
             "huber",
             "universal",
             "energy_forces_dipole",
+            "energy_mbis",
             "l1l2energyforces",
         ],
     )
@@ -631,6 +646,16 @@ def build_default_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--dipole_weight", help="weight of dipoles loss", type=float, default=1.0
+    )
+    parser.add_argument(
+        "--valence_widths_weight", help="weight of valence widths loss",
+        type=float, default=1.0
+    )
+    parser.add_argument(
+        "--charges_weight", help="weight of charges loss", type=float, default=1.0
+    )
+    parser.add_argument(
+        "--atomic_dipoles_weight", help="weight of atomic dipoles loss", type=float, default=1.0
     )
     parser.add_argument(
         "--swa_dipole_weight",
@@ -968,10 +993,22 @@ def build_preprocess_arg_parser() -> argparse.ArgumentParser:
         default=DefaultKeys.DIPOLE.value,
     )
     parser.add_argument(
+        "--valence_widths_key",
+        help="Key of valence widths in training xyz",
+        type=str,
+        default=DefaultKeys.VALENCE_WIDTHS.value,
+    )
+    parser.add_argument(
         "--charges_key",
         help="Key of atomic charges in training xyz",
         type=str,
         default=DefaultKeys.CHARGES.value,
+    )
+    parser.add_argument(
+        "--atomic_dipoles_key",
+        help="Key of atomic dipoles in training xyz",
+        type=str,
+        default=DefaultKeys.ATOMIC_DIPOLES.value,
     )
     parser.add_argument(
         "--atomic_numbers",

@@ -7,6 +7,7 @@ from .blocks import (
     EquivariantProductBasisBlock,
     InteractionBlock,
     LinearDipoleReadoutBlock,
+    LinearMBISReadoutBlock,
     LinearNodeEmbeddingBlock,
     LinearReadoutBlock,
     NonLinearBiasReadoutBlock,
@@ -25,6 +26,7 @@ from .loss import (
     DipoleSingleLoss,
     UniversalLoss,
     WeightedEnergyForcesDipoleLoss,
+    WeightedEnergyForcesMBISLoss,
     WeightedEnergyForcesL1L2Loss,
     WeightedEnergyForcesLoss,
     WeightedEnergyForcesStressLoss,
@@ -32,7 +34,13 @@ from .loss import (
     WeightedForcesLoss,
     WeightedHuberEnergyForcesStressLoss,
 )
-from .models import MACE, AtomicDipolesMACE, EnergyDipolesMACE, ScaleShiftMACE
+from .models import (
+    MACE,
+    AtomicDipolesMACE,
+    EnergyDipolesMACE,
+    EnergyMBISMACE,
+    ScaleShiftMACE,
+)
 from .radial import BesselBasis, GaussianBasis, PolynomialCutoff, ZBLBasis
 from .symmetric_contraction import SymmetricContraction
 from .utils import (
@@ -83,6 +91,7 @@ __all__ = [
     "EquivariantProductBasisBlock",
     "ScaleShiftBlock",
     "LinearDipoleReadoutBlock",
+    "LinearMBISReadoutBlock",
     "NonLinearDipoleReadoutBlock",
     "InteractionBlock",
     "NonLinearReadoutBlock",
@@ -93,12 +102,14 @@ __all__ = [
     "ScaleShiftMACE",
     "AtomicDipolesMACE",
     "EnergyDipolesMACE",
+    "EnergyMBISMACE",
     "WeightedEnergyForcesLoss",
     "WeightedForcesLoss",
     "WeightedEnergyForcesVirialsLoss",
     "WeightedEnergyForcesStressLoss",
     "DipoleSingleLoss",
     "WeightedEnergyForcesDipoleLoss",
+    "WeightedEnergyForcesMBISLoss",
     "WeightedHuberEnergyForcesStressLoss",
     "UniversalLoss",
     "WeightedEnergyForcesL1L2Loss",

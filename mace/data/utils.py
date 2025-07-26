@@ -59,7 +59,12 @@ def update_keyspec_from_kwargs(
         "total_charge_key",
         "total_spin_key",
     ]
-    arrays = ["forces_key", "charges_key"]
+    arrays = [
+        "forces_key",
+        "valence_widths_key",
+        "charges_key",
+        "atomic_dipoles_key",
+    ]
     info_keys = {}
     arrays_keys = {}
     for key in infos:
@@ -347,12 +352,17 @@ def save_AtomicData_to_HDF5(data, i, h5_file) -> None:
     grp["forces_weight"] = data.forces_weight
     grp["stress_weight"] = data.stress_weight
     grp["virials_weight"] = data.virials_weight
+    grp["valence_widths_weight"] = data.valence_widths_weight
+    grp["charges_weight"] = data.charges_weight
+    grp["atomic_dipoles_weight"] = data.atomic_dipoles_weight
     grp["forces"] = data.forces
     grp["energy"] = data.energy
     grp["stress"] = data.stress
     grp["virials"] = data.virials
     grp["dipole"] = data.dipole
+    grp["valence_widths"] = data.valence_widths
     grp["charges"] = data.charges
+    grp["atomic_dipoles"] = data.atomic_dipoles
     grp["head"] = data.head
 
 

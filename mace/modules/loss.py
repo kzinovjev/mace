@@ -156,6 +156,62 @@ def weighted_mean_squared_error_dipole(
 
 
 # ------------------------------------------------------------------------------
+# MBIS Loss Functions
+# ------------------------------------------------------------------------------
+
+def mean_squared_error_valence_widths(
+    ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
+) -> torch.Tensor:
+    # Repeat per-graph weights to per-atom level.
+    configs_weight = torch.repeat_interleave(
+        ref.weight, ref.ptr[1:] - ref.ptr[:-1]
+    ).unsqueeze(-1)
+    configs_valence_widths_weight = torch.repeat_interleave(
+        ref.valence_widths_weight, ref.ptr[1:] - ref.ptr[:-1]
+    ).unsqueeze(-1)
+    raw_loss = (
+        configs_weight
+        * configs_valence_widths_weight
+        * torch.square(ref["valence_widths"] - pred["valence_widths"])
+    )
+    return reduce_loss(raw_loss, ddp)
+
+
+def mean_squared_error_charges(
+    ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
+) -> torch.Tensor:
+    # Repeat per-graph weights to per-atom level.
+    configs_weight = torch.repeat_interleave(
+        ref.weight, ref.ptr[1:] - ref.ptr[:-1]
+    ).unsqueeze(-1)
+    configs_charges_weight = torch.repeat_interleave(
+        ref.charges_weight, ref.ptr[1:] - ref.ptr[:-1]
+    ).unsqueeze(-1)
+    raw_loss = (
+        configs_weight
+        * configs_charges_weight
+        * torch.square(ref["charges"] - pred["charges"])
+    )
+    return reduce_loss(raw_loss, ddp)
+
+def mean_squared_error_atomic_dipoles(
+    ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
+) -> torch.Tensor:
+    # Repeat per-graph weights to per-atom level.
+    configs_weight = torch.repeat_interleave(
+        ref.weight, ref.ptr[1:] - ref.ptr[:-1]
+    ).unsqueeze(-1)
+    configs_atomic_dipoles_weight = torch.repeat_interleave(
+        ref.atomic_dipoles_weight, ref.ptr[1:] - ref.ptr[:-1]
+    ).unsqueeze(-1)
+    raw_loss = (
+        configs_weight
+        * configs_atomic_dipoles_weight
+        * torch.square(ref["atomic_dipoles"] - pred["atomic_dipoles"])
+    )
+    return reduce_loss(raw_loss, ddp)
+
+# ------------------------------------------------------------------------------
 # Conditional Losses for Forces
 # ------------------------------------------------------------------------------
 
@@ -537,6 +593,63 @@ class WeightedEnergyForcesDipoleLoss(torch.nn.Module):
         return (
             f"{self.__class__.__name__}(energy_weight={self.energy_weight:.3f}, "
             f"forces_weight={self.forces_weight:.3f}, dipole_weight={self.dipole_weight:.3f})"
+        )
+
+
+class WeightedEnergyForcesMBISLoss(torch.nn.Module):
+    def __init__(
+            self,
+            energy_weight=1.0,
+            forces_weight=1.0,
+            valence_widths_weight=1.0,
+            charges_weight=1.0,
+            atomic_dipoles_weight=1.0
+    ) -> None:
+        super().__init__()
+        self.register_buffer(
+            "energy_weight",
+            torch.tensor(energy_weight, dtype=torch.get_default_dtype()),
+        )
+        self.register_buffer(
+            "forces_weight",
+            torch.tensor(forces_weight, dtype=torch.get_default_dtype()),
+        )
+        self.register_buffer(
+            "valence_widths_weight",
+            torch.tensor(valence_widths_weight, dtype=torch.get_default_dtype()),
+        )
+        self.register_buffer(
+            "charges_weight",
+            torch.tensor(charges_weight, dtype=torch.get_default_dtype()),
+        )
+        self.register_buffer(
+            "atomic_dipoles_weight",
+            torch.tensor(atomic_dipoles_weight, dtype=torch.get_default_dtype()),
+        )
+
+    def forward(
+        self, ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
+    ) -> torch.Tensor:
+        loss_energy = weighted_mean_squared_error_energy(ref, pred, ddp)
+        loss_forces = mean_squared_error_forces(ref, pred, ddp)
+        loss_valence_widths = mean_squared_error_valence_widths(ref, pred, ddp)
+        loss_charges = mean_squared_error_charges(ref, pred, ddp)
+        loss_atomic_dipoles = mean_squared_error_atomic_dipoles(ref, pred, ddp)
+        return (
+            self.energy_weight * loss_energy
+            + self.forces_weight * loss_forces
+            + self.valence_widths_weight * loss_valence_widths
+            + self.charges_weight * loss_charges
+            + self.atomic_dipoles_weight * loss_atomic_dipoles
+        )
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}(energy_weight={self.energy_weight:.3f}, "
+            f"forces_weight={self.forces_weight:.3f}, "
+            f"valence_widths_weight={self.valence_widths_weight:.3f}), "
+            f"charges_weight={self.charges_weight:.3f}), "
+            f"atomic_dipoles_weight={self.atomic_dipoles_weight:.3f})"
         )
 
 
