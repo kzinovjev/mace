@@ -9,6 +9,7 @@ class DefaultKeys(Enum):
     STRESS = "REF_stress"
     VIRIALS = "REF_virials"
     DIPOLE = "dipole"
+    POLARIZABILITY = "polarizability"
     HEAD = "head"
     VALENCE_WIDTHS = "REF_valence_widths"
     CHARGES = "REF_charges"

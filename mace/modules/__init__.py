@@ -6,11 +6,13 @@ from .blocks import (
     AtomicEnergiesBlock,
     EquivariantProductBasisBlock,
     InteractionBlock,
+    LinearDipolePolarReadoutBlock,
     LinearDipoleReadoutBlock,
     LinearMBISReadoutBlock,
     LinearNodeEmbeddingBlock,
     LinearReadoutBlock,
     NonLinearBiasReadoutBlock,
+    NonLinearDipolePolarReadoutBlock,
     NonLinearDipoleReadoutBlock,
     NonLinearReadoutBlock,
     RadialEmbeddingBlock,
@@ -23,6 +25,7 @@ from .blocks import (
     ScaleShiftBlock,
 )
 from .loss import (
+    DipolePolarLoss,
     DipoleSingleLoss,
     UniversalLoss,
     WeightedEnergyForcesDipoleLoss,
@@ -36,6 +39,7 @@ from .loss import (
 )
 from .models import (
     MACE,
+    AtomicDielectricMACE,
     AtomicDipolesMACE,
     EnergyDipolesMACE,
     EnergyMBISMACE,
@@ -45,7 +49,9 @@ from .radial import BesselBasis, GaussianBasis, PolynomialCutoff, ZBLBasis
 from .symmetric_contraction import SymmetricContraction
 from .utils import (
     compute_avg_num_neighbors,
+    compute_dielectric_gradients,
     compute_fixed_charge_dipole,
+    compute_fixed_charge_dipole_polar,
     compute_mean_rms_energy_forces,
     compute_mean_std_atomic_inter_energy,
     compute_rms_dipoles,
@@ -92,7 +98,9 @@ __all__ = [
     "ScaleShiftBlock",
     "LinearDipoleReadoutBlock",
     "LinearMBISReadoutBlock",
+    "LinearDipolePolarReadoutBlock",
     "NonLinearDipoleReadoutBlock",
+    "NonLinearDipolePolarReadoutBlock",
     "InteractionBlock",
     "NonLinearReadoutBlock",
     "PolynomialCutoff",
@@ -101,6 +109,7 @@ __all__ = [
     "MACE",
     "ScaleShiftMACE",
     "AtomicDipolesMACE",
+    "AtomicDielectricMACE",
     "EnergyDipolesMACE",
     "EnergyMBISMACE",
     "WeightedEnergyForcesLoss",
@@ -119,4 +128,6 @@ __all__ = [
     "compute_avg_num_neighbors",
     "compute_statistics",
     "compute_fixed_charge_dipole",
+    "compute_fixed_charge_dipole_polar",
+    "compute_dielectric_gradients",
 ]
