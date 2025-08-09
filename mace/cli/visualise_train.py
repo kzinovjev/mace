@@ -104,11 +104,11 @@ error_type = {
             ("dipole", "Dipole per atom [Debye]"),
         ],
     ),
-    "MBISRMSE": (
+    "EMLERMSE": (
         [
-            ("rmse_mbis_s", "RMSE s/atom [A]"),
-            ("rmse_mbis_q", "RMSE q/atom [e]"),
-            ("rmse_mbis_mu", "RMSE mu/atom [e * A]"),
+            ("rmse_emle_s", "RMSE s/atom [A]"),
+            ("rmse_emle_q", "RMSE q/atom [e]"),
+            ("rmse_emle_mu", "RMSE mu/atom [e * A]"),
 
         ],
         [

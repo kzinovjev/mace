@@ -638,9 +638,9 @@ def get_loss_fn(
             forces_weight=args.forces_weight,
             dipole_weight=args.dipole_weight,
         )
-    elif args.loss == "energy_mbis":
+    elif args.loss == "energy_emle":
         assert dipole_only is False
-        loss_fn = modules.WeightedEnergyForcesMBISLoss(
+        loss_fn = modules.WeightedEnergyForcesEMLELoss(
             energy_weight=args.energy_weight,
             forces_weight=args.forces_weight,
             valence_widths_weight=args.valence_widths_weight,

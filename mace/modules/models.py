@@ -26,8 +26,8 @@ from .blocks import (
     LinearReadoutBlock,
     NonLinearDipolePolarReadoutBlock,
     NonLinearDipoleReadoutBlock,
-    LinearMBISReadoutBlock,
-    NonLinearMBISReadoutBlock,
+    LinearEMLEReadoutBlock,
+    NonLinearEMLEReadoutBlock,
     NonLinearReadoutBlock,
     RadialEmbeddingBlock,
     ScaleShiftBlock,
@@ -1416,7 +1416,7 @@ class EnergyDipolesMACE(torch.nn.Module):
         return output
 
 @compile_mode("script")
-class EnergyMBISMACE(torch.nn.Module):
+class EnergyEMLEMACE(torch.nn.Module):
     def __init__(
         self,
         r_max: float,
@@ -1503,7 +1503,7 @@ class EnergyMBISMACE(torch.nn.Module):
         self.products = torch.nn.ModuleList([prod])
 
         self.readouts = torch.nn.ModuleList()
-        self.readouts.append(LinearMBISReadoutBlock(hidden_irreps))
+        self.readouts.append(LinearEMLEReadoutBlock(hidden_irreps))
 
         for i in range(num_interactions - 1):
             if i == num_interactions - 2:
@@ -1536,13 +1536,13 @@ class EnergyMBISMACE(torch.nn.Module):
             self.products.append(prod)
             if i == num_interactions - 2:
                 self.readouts.append(
-                    NonLinearMBISReadoutBlock(
+                    NonLinearEMLEReadoutBlock(
                         hidden_irreps_out, MLP_irreps, gate
                     )
                 )
             else:
                 self.readouts.append(
-                    LinearMBISReadoutBlock(hidden_irreps)
+                    LinearEMLEReadoutBlock(hidden_irreps)
                 )
 
     def forward(

@@ -472,7 +472,7 @@ def run(args) -> None:
             atomic_energies_dict_padded[head_name] = energy_head_padded
         atomic_energies_dict = atomic_energies_dict_padded
 
-    args.compute_mbis = False
+    args.compute_emle = False
     if args.model == "AtomicDipolesMACE":
         atomic_energies = None
         dipole_only = True
@@ -500,13 +500,13 @@ def run(args) -> None:
             args.compute_virials = False
             args.compute_stress = False
             args.compute_polarizability = False
-        if args.model == "EnergyMBISMACE":
+        if args.model == "EnergyEMLEMACE":
             args.compute_dipole = False
             args.compute_energy = True
             args.compute_forces = True
             args.compute_virials = False
             args.compute_stress = False
-            args.compute_mbis = True
+            args.compute_emle = True
             args.compute_polarizability = False
         else:
             args.compute_energy = True

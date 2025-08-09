@@ -96,8 +96,8 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
-        "--return_mbis",
-        help="model outputs MBIS atomic properties",
+        "--return_emle",
+        help="model outputs EMLE atomic properties",
         action="store_true",
         default=False,
     )
@@ -266,7 +266,7 @@ def run(args: argparse.Namespace) -> None:
                 ]  # drop last as its empty
             )
 
-        if args.return_mbis:
+        if args.return_emle:
             valence_widths_list.append(
                 np.split(
                     torch_tools.to_numpy(output["valence_widths"]),
@@ -328,7 +328,7 @@ def run(args: argparse.Namespace) -> None:
         node_energies = np.concatenate(node_energies_list, axis=0)
         assert len(atoms_list) == node_energies.shape[0]
 
-    if args.return_mbis:
+    if args.return_emle:
         valence_widths = np.concatenate(valence_widths_list, axis=0)
         assert len(atoms_list) == valence_widths.shape[0]
         charges = np.concatenate(charges_list, axis=0)
@@ -373,7 +373,7 @@ def run(args: argparse.Namespace) -> None:
         if args.return_node_energies:
             atoms.arrays[args.info_prefix + "node_energies"] = node_energies[i]
 
-        if args.return_mbis:
+        if args.return_emle:
             atoms.arrays[args.info_prefix + "valence_widths"] = valence_widths[i]
             atoms.arrays[args.info_prefix + "charges"] = charges[i]
             atoms.arrays[args.info_prefix + "atomic_dipoles"] = atomic_dipoles[i]

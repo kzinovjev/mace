@@ -37,7 +37,7 @@ def configure_model(
         "virials": compute_virials,
         "stress": compute_stress,
         "dipoles": args.compute_dipole,
-        "mbis": args.compute_mbis,
+        "emle": args.compute_emle,
         "polarizabilities": args.compute_polarizability,
     }
     logging.info(
@@ -332,14 +332,14 @@ def _build_model(
             ],
             MLP_irreps=o3.Irreps(args.MLP_irreps),
         )
-    if args.model == "EnergyMBISMACE":
+    if args.model == "EnergyEMLEMACE":
         assert (
-            args.loss == "energy_mbis"
-        ), "Use energy_mbis loss with EnergyMBISMACE model"
+            args.loss == "energy_emle"
+        ), "Use energy_emle loss with EnergyEMLEMACE model"
         assert (
-            args.error_table == "EnergyMBISRMSE"
-        ), "Use error_table EnergyMBISRMSE with EnergyMBISMACE model"
-        return modules.EnergyMBISMACE(
+            args.error_table == "EnergyEMLERMSE"
+        ), "Use error_table EnergyEMLERMSE with EnergyEMLEMACE model"
+        return modules.EnergyEMLEMACE(
             **model_config,
             correlation=args.correlation,
             gate=modules.gate_dict[args.gate],

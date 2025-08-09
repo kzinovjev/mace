@@ -156,7 +156,7 @@ def weighted_mean_squared_error_dipole(
 
 
 # ------------------------------------------------------------------------------
-# MBIS Loss Functions
+# EMLE Loss Functions
 # ------------------------------------------------------------------------------
 
 def mean_squared_error_valence_widths(
@@ -656,7 +656,7 @@ class WeightedEnergyForcesDipoleLoss(torch.nn.Module):
         )
 
 
-class WeightedEnergyForcesMBISLoss(torch.nn.Module):
+class WeightedEnergyForcesEMLELoss(torch.nn.Module):
     def __init__(
             self,
             energy_weight=1.0,

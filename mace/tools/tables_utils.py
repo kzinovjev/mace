@@ -259,19 +259,19 @@ def create_error_table(
                     f"{metrics['rel_rmse_mu']:8.1f}",
                 ]
             )
-        elif table_type == "EnergyMBISRMSE":
+        elif table_type == "EnergyEMLERMSE":
             table.add_row(
                 [
                     name,
                     f"{metrics['rmse_e_per_atom'] * 1000:8.1f}",
                     f"{metrics['rmse_f'] * 1000:8.1f}",
                     f"{metrics['rel_rmse_f']:8.1f}",
-                    f"{metrics['rmse_mbis_s']:8.4f}",
-                    f"{metrics['rel_rmse_mbis_s']:8.1f}",
-                    f"{metrics['rmse_mbis_q']:8.4f}",
-                    f"{metrics['rel_rmse_mbis_q']:8.1f}",
-                    f"{metrics['rmse_mbis_mu']:8.4f}",
-                    f"{metrics['rel_rmse_mbis_mu']:8.1f}",
+                    f"{metrics['rmse_emle_s']:8.4f}",
+                    f"{metrics['rel_rmse_emle_s']:8.1f}",
+                    f"{metrics['rmse_emle_q']:8.4f}",
+                    f"{metrics['rel_rmse_emle_q']:8.1f}",
+                    f"{metrics['rmse_emle_mu']:8.4f}",
+                    f"{metrics['rel_rmse_emle_mu']:8.1f}",
                 ]
             )
     return table

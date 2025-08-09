@@ -144,18 +144,18 @@ def valid_err_log(
         logging.info(
             f"{inintial_phrase}: head: {valid_loader_name}, loss={valid_loss:8.8f}, RMSE_E_per_atom={error_e:8.2f} meV, RMSE_F={error_f:8.2f} meV / A, RMSE_Mu_per_atom={error_mu:8.2f} mDebye",
         )
-    elif log_errors == "EnergyMBISRMSE":
+    elif log_errors == "EnergyEMLERMSE":
         error_e = eval_metrics["rmse_e_per_atom"] * 1e3
         error_f = eval_metrics["rmse_f"] * 1e3
-        error_s = eval_metrics["rmse_mbis_s"]
-        error_q = eval_metrics["rmse_mbis_q"]
-        error_mu = eval_metrics["rmse_mbis_mu"]
+        error_s = eval_metrics["rmse_emle_s"]
+        error_q = eval_metrics["rmse_emle_q"]
+        error_mu = eval_metrics["rmse_emle_mu"]
         logging.info(
             f"{inintial_phrase}: head: {valid_loader_name}, loss={valid_loss:8.8f}, "
             f"RMSE_E_per_atom={error_e:8.2f} meV, RMSE_F={error_f:8.2f} meV / A, "
-            f"RMSE_mbis_s={error_s:7.4f} A, "
-            f"RMSE_mbis_q={error_q:7.4f} e, "
-            f"RMSE_mbis_mu={error_mu:7.4f} q * A"
+            f"RMSE_emle_s={error_s:7.4f} A, "
+            f"RMSE_emle_q={error_q:7.4f} e, "
+            f"RMSE_emle_mu={error_mu:7.4f} q * A"
         )
 
 
@@ -767,18 +767,18 @@ class MACELoss(Metric):
         if self.valence_widths_computed:
             valence_widths = self.convert(self.valence_widths)
             delta_valence_widths = self.convert(self.delta_valence_widths)
-            aux['rmse_mbis_s'] = compute_rmse(delta_valence_widths)
-            aux['rel_rmse_mbis_s'] = compute_rel_rmse(delta_valence_widths, valence_widths)
+            aux['rmse_emle_s'] = compute_rmse(delta_valence_widths)
+            aux['rel_rmse_emle_s'] = compute_rel_rmse(delta_valence_widths, valence_widths)
         if self.charges_computed:
             charges = self.convert(self.charges)
             delta_charges = self.convert(self.delta_charges)
-            aux['rmse_mbis_q'] = compute_rmse(delta_charges)
-            aux['rel_rmse_mbis_q'] = compute_rel_rmse(delta_charges, charges)
+            aux['rmse_emle_q'] = compute_rmse(delta_charges)
+            aux['rel_rmse_emle_q'] = compute_rel_rmse(delta_charges, charges)
         if self.atomic_dipoles_computed:
             atomic_dipoles = self.convert(self.atomic_dipoles)
             delta_atomic_dipoles = self.convert(self.delta_atomic_dipoles)
-            aux['rmse_mbis_mu'] = compute_rmse(delta_atomic_dipoles)
-            aux['rel_rmse_mbis_mu'] = compute_rel_rmse(delta_atomic_dipoles, atomic_dipoles)
+            aux['rmse_emle_mu'] = compute_rmse(delta_atomic_dipoles)
+            aux['rel_rmse_emle_mu'] = compute_rel_rmse(delta_atomic_dipoles, atomic_dipoles)
         if self.polarizability_computed:
             delta_polarizability = self.convert(self.delta_polarizability)
             delta_polarizability_per_atom = self.convert(
