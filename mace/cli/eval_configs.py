@@ -192,7 +192,8 @@ def run(args: argparse.Namespace) -> None:
     qs_list = []
     forces_collection = []
     valence_widths_list = []
-    charges_list = []
+    core_charges_list = []
+    valence_charges_list = []
     atomic_dipoles_list = []
 
     for batch in data_loader:
@@ -277,13 +278,22 @@ def run(args: argparse.Namespace) -> None:
                 ]  # drop last as its empty
             )
 
-            charges_list.append(
+            core_charges_list.append(
                 np.split(
-                    torch_tools.to_numpy(output["charges"]),
+                    torch_tools.to_numpy(output["core_charges"]),
                     indices_or_sections=batch.ptr[1:],
                     axis=0,
                 )[
                     :-1
+                ]  # drop last as its empty
+            )
+            valence_charges_list.append(
+                np.split(
+                    torch_tools.to_numpy(output["valence_charges"]),
+                    indices_or_sections=batch.ptr[1:],
+                    axis=0,
+                )[
+                :-1
                 ]  # drop last as its empty
             )
             atomic_dipoles_list.append(
@@ -331,8 +341,10 @@ def run(args: argparse.Namespace) -> None:
     if args.return_emle:
         valence_widths = np.concatenate(valence_widths_list, axis=0)
         assert len(atoms_list) == valence_widths.shape[0]
-        charges = np.concatenate(charges_list, axis=0)
-        assert len(atoms_list) == charges.shape[0]
+        core_charges = np.concatenate(core_charges_list, axis=0)
+        assert len(atoms_list) == core_charges.shape[0]
+        valence_charges = np.concatenate(valence_charges_list, axis=0)
+        assert len(atoms_list) == valence_charges.shape[0]
         atomic_dipoles = np.concatenate(atomic_dipoles_list, axis=0)
         assert len(atoms_list) == atomic_dipoles.shape[0]
 
@@ -375,7 +387,8 @@ def run(args: argparse.Namespace) -> None:
 
         if args.return_emle:
             atoms.arrays[args.info_prefix + "valence_widths"] = valence_widths[i]
-            atoms.arrays[args.info_prefix + "charges"] = charges[i]
+            atoms.arrays[args.info_prefix + "core_charges"] = core_charges[i]
+            atoms.arrays[args.info_prefix + "valence_charges"] = valence_charges[i]
             atoms.arrays[args.info_prefix + "atomic_dipoles"] = atomic_dipoles[i]
 
     # Write atoms to output path

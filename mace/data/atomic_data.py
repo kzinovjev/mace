@@ -38,6 +38,8 @@ class AtomicData(torch_geometric.data.Data):
     virials: torch.Tensor
     dipole: torch.Tensor
     valence_widths: torch.Tensor
+    core_charges: torch.Tensor
+    valence_charges: torch.Tensor
     charges: torch.Tensor
     atomic_dipoles: torch.Tensor
     polarizability: torch.Tensor
@@ -50,6 +52,8 @@ class AtomicData(torch_geometric.data.Data):
     virials_weight: torch.Tensor
     dipole_weight: torch.Tensor
     valence_widths_weight: torch.Tensor
+    core_charges_weight: torch.Tensor
+    valence_charges_weight: torch.Tensor
     charges_weight: torch.Tensor
     atomic_dipoles_weight: torch.Tensor
     polarizability_weight: torch.Tensor
@@ -70,6 +74,8 @@ class AtomicData(torch_geometric.data.Data):
         virials_weight: Optional[torch.Tensor],  # [,]
         dipole_weight: Optional[torch.Tensor],  # [,]
         valence_widths_weight: Optional[torch.Tensor],  # [,]
+        core_charges_weight: Optional[torch.Tensor],  # [,]
+        valence_charges_weight: Optional[torch.Tensor],  # [,]
         charges_weight: Optional[torch.Tensor],  # [,]
         atomic_dipoles_weight: Optional[torch.Tensor],  # [,]
         polarizability_weight: Optional[torch.Tensor],  # [,]
@@ -79,6 +85,8 @@ class AtomicData(torch_geometric.data.Data):
         virials: Optional[torch.Tensor],  # [1,3,3]
         dipole: Optional[torch.Tensor],  # [, 3]
         valence_widths: Optional[torch.Tensor],  # [n_nodes, ]
+        core_charges: Optional[torch.Tensor],  # [n_nodes, ]
+        valence_charges: Optional[torch.Tensor],  # [n_nodes, ]
         charges: Optional[torch.Tensor],  # [n_nodes, ]
         atomic_dipoles: Optional[torch.Tensor],  # [n_nodes, 3]
         polarizability: Optional[torch.Tensor],  # [1, 3, 3]
@@ -102,6 +110,9 @@ class AtomicData(torch_geometric.data.Data):
         assert virials_weight is None or len(virials_weight.shape) == 0
         assert dipole_weight is None or dipole_weight.shape == (1, 3), dipole_weight
         assert valence_widths_weight is None or len(valence_widths_weight.shape) == 0
+        assert core_charges_weight is None or len(core_charges_weight.shape) == 0
+        assert valence_charges_weight is None or len(valence_charges_weight.shape) == 0
+        assert charges_weight is None or len(charges_weight.shape) == 0
         assert charges_weight is None or len(charges_weight.shape) == 0
         assert atomic_dipoles_weight is None or len(atomic_dipoles_weight.shape) == 0
         assert cell is None or cell.shape == (3, 3)
@@ -111,6 +122,8 @@ class AtomicData(torch_geometric.data.Data):
         assert virials is None or virials.shape == (1, 3, 3)
         assert dipole is None or dipole.shape[-1] == 3
         assert valence_widths is None or valence_widths.shape == (num_nodes,)
+        assert core_charges is None or core_charges.shape == (num_nodes,)
+        assert valence_charges is None or valence_charges.shape == (num_nodes,)
         assert charges is None or charges.shape == (num_nodes,)
         assert atomic_dipoles is None or atomic_dipoles.shape == (num_nodes, 3)
         assert elec_temp is None or len(elec_temp.shape) == 0
@@ -134,6 +147,8 @@ class AtomicData(torch_geometric.data.Data):
             "virials_weight": virials_weight,
             "dipole_weight": dipole_weight,
             "valence_widths_weight": valence_widths_weight,
+            "core_charges_weight": core_charges_weight,
+            "valence_charges_weight": valence_charges_weight,
             "charges_weight": charges_weight,
             "atomic_dipoles_weight": atomic_dipoles_weight,
             "polarizability_weight": polarizability_weight,
@@ -143,6 +158,8 @@ class AtomicData(torch_geometric.data.Data):
             "virials": virials,
             "dipole": dipole,
             "valence_widths": valence_widths,
+            "core_charges": core_charges,
+            "valence_charges": valence_charges,
             "charges": charges,
             "atomic_dipoles": atomic_dipoles,
             "polarizability": polarizability,
@@ -249,6 +266,22 @@ class AtomicData(torch_geometric.data.Data):
             else torch.tensor(1.0, dtype=torch.get_default_dtype())
         )
 
+        core_charges_weight = (
+            torch.tensor(
+                config.property_weights.get("core_charges"), dtype=torch.get_default_dtype()
+            )
+            if config.property_weights.get("core_charges") is not None
+            else torch.tensor(1.0, dtype=torch.get_default_dtype())
+        )
+
+        valence_charges_weight = (
+            torch.tensor(
+                config.property_weights.get("valence_charges"), dtype=torch.get_default_dtype()
+            )
+            if config.property_weights.get("valence_charges") is not None
+            else torch.tensor(1.0, dtype=torch.get_default_dtype())
+        )
+
         charges_weight = (
             torch.tensor(
                 config.property_weights.get("charges"), dtype=torch.get_default_dtype()
@@ -329,6 +362,20 @@ class AtomicData(torch_geometric.data.Data):
             if config.properties.get("valence_widths") is not None
             else torch.zeros(num_atoms, dtype=torch.get_default_dtype())
         )
+        core_charges = (
+            torch.tensor(
+                config.properties.get("core_charges"), dtype=torch.get_default_dtype()
+            )
+            if config.properties.get("core_charges") is not None
+            else torch.zeros(num_atoms, dtype=torch.get_default_dtype())
+        )
+        valence_charges = (
+            torch.tensor(
+                config.properties.get("valence_charges"), dtype=torch.get_default_dtype()
+            )
+            if config.properties.get("valence_charges") is not None
+            else torch.zeros(num_atoms, dtype=torch.get_default_dtype())
+        )
         charges = (
             torch.tensor(
                 config.properties.get("charges"), dtype=torch.get_default_dtype()
@@ -391,6 +438,8 @@ class AtomicData(torch_geometric.data.Data):
             virials_weight=virials_weight,
             dipole_weight=dipole_weight,
             valence_widths_weight=valence_widths_weight,
+            core_charges_weight=core_charges_weight,
+            valence_charges_weight=valence_charges_weight,
             charges_weight=charges_weight,
             atomic_dipoles_weight=atomic_dipoles_weight,
             polarizability_weight=polarizability_weight,
@@ -400,6 +449,8 @@ class AtomicData(torch_geometric.data.Data):
             virials=virials,
             dipole=dipole,
             valence_widths=valence_widths,
+            core_charges=core_charges,
+            valence_charges=valence_charges,
             charges=charges,
             atomic_dipoles=atomic_dipoles,
             elec_temp=elec_temp,

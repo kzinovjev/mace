@@ -1605,7 +1605,8 @@ class EnergyEMLEMACE(torch.nn.Module):
         energies = [e0]
         node_energies_list = [node_e0]
         node_valence_widths_list = []
-        node_charges_list = []
+        node_core_charges_list = []
+        node_valence_charges_list = []
         node_atomic_dipoles_list = []
         for interaction, product, readout in zip(
             self.interactions, self.products, self.readouts
@@ -1631,8 +1632,9 @@ class EnergyEMLEMACE(torch.nn.Module):
             )  # [n_graphs,]
             energies.append(energy)
             node_valence_widths_list.append(node_out[:, 1])
-            node_charges_list.append(node_out[:, 2])
-            node_atomic_dipoles_list.append(node_out[:, 3:])
+            node_core_charges_list.append(node_out[:, 2])
+            node_valence_charges_list.append(node_out[:, 3])
+            node_atomic_dipoles_list.append(node_out[:, 4:])
 
         # Compute the energies and dipoles
         contributions = torch.stack(energies, dim=-1)
@@ -1641,20 +1643,25 @@ class EnergyEMLEMACE(torch.nn.Module):
         node_energy = torch.sum(node_energy_contributions, dim=-1)  # [n_nodes, ]
         contributions_valence_widths = torch.stack(
             node_valence_widths_list, dim=-1
-        )  # [n_nodes,n_contributions] Check
-        contributions_charges = torch.stack(
-            node_charges_list, dim=-1
-        )  # [n_nodes,n_contributions] Check
+        )
+        contributions_core_charges = torch.stack(
+            node_core_charges_list, dim=-1
+        )
+        contributions_valence_charges = torch.stack(
+            node_valence_charges_list, dim=-1
+        )
         contributions_atomic_dipoles = torch.stack(
             node_atomic_dipoles_list, dim=-1
         )  # [n_nodes,3,n_contributions]
         valence_widths = torch.sum(contributions_valence_widths, dim=-1)  # [n_nodes]
-        charges = torch.sum(contributions_charges, dim=-1)  # [n_nodes]
+        core_charges = torch.sum(contributions_core_charges, dim=-1)  # [n_nodes]
+        valence_charges = torch.sum(contributions_valence_charges, dim=-1)  # [n_nodes]
+        charges = core_charges + valence_charges
 
         total_charge_excess = scatter_mean(
             src=charges, index=data["batch"], dim_size=num_graphs
         ) - (data["total_charge"] / num_atoms)
-        charges = charges - total_charge_excess[data["batch"]]
+        valence_charges = valence_charges - total_charge_excess[data["batch"]]
 
         atomic_dipoles = torch.sum(contributions_atomic_dipoles, dim=-1)  # [n_nodes,3]
 
@@ -1678,7 +1685,8 @@ class EnergyEMLEMACE(torch.nn.Module):
             "stress": stress,
             "displacement": displacement,
             "valence_widths": valence_widths,
-            "charges": charges,
+            "core_charges": core_charges,
+            "valence_charges": valence_charges,
             "atomic_dipoles": atomic_dipoles,
         }
         return output

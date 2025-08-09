@@ -268,8 +268,10 @@ def create_error_table(
                     f"{metrics['rel_rmse_f']:8.1f}",
                     f"{metrics['rmse_emle_s']:8.4f}",
                     f"{metrics['rel_rmse_emle_s']:8.1f}",
-                    f"{metrics['rmse_emle_q']:8.4f}",
-                    f"{metrics['rel_rmse_emle_q']:8.1f}",
+                    f"{metrics['rmse_emle_q_core']:8.4f}",
+                    f"{metrics['rel_rmse_emle_q_core']:8.1f}",
+                    f"{metrics['rmse_emle_q_val']:8.4f}",
+                    f"{metrics['rel_rmse_emle_q_val']:8.1f}",
                     f"{metrics['rmse_emle_mu']:8.4f}",
                     f"{metrics['rel_rmse_emle_mu']:8.1f}",
                 ]

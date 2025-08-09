@@ -644,7 +644,8 @@ def get_loss_fn(
             energy_weight=args.energy_weight,
             forces_weight=args.forces_weight,
             valence_widths_weight=args.valence_widths_weight,
-            charges_weight=args.charges_weight,
+            core_charges_weight=args.core_charges_weight,
+            valence_charges_weight=args.valence_charges_weight,
             atomic_dipoles_weight=args.atomic_dipoles_weight
         )
     else:

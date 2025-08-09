@@ -177,22 +177,41 @@ def mean_squared_error_valence_widths(
     return reduce_loss(raw_loss, ddp)
 
 
-def mean_squared_error_charges(
+def mean_squared_error_core_charges(
     ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
 ) -> torch.Tensor:
     # Repeat per-graph weights to per-atom level.
     configs_weight = torch.repeat_interleave(
         ref.weight, ref.ptr[1:] - ref.ptr[:-1]
     ).unsqueeze(-1)
-    configs_charges_weight = torch.repeat_interleave(
-        ref.charges_weight, ref.ptr[1:] - ref.ptr[:-1]
+    configs_core_charges_weight = torch.repeat_interleave(
+        ref.core_charges_weight, ref.ptr[1:] - ref.ptr[:-1]
     ).unsqueeze(-1)
     raw_loss = (
         configs_weight
-        * configs_charges_weight
-        * torch.square(ref["charges"] - pred["charges"])
+        * configs_core_charges_weight
+        * torch.square(ref["core_charges"] - pred["core_charges"])
     )
     return reduce_loss(raw_loss, ddp)
+
+
+def mean_squared_error_valence_charges(
+    ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
+) -> torch.Tensor:
+    # Repeat per-graph weights to per-atom level.
+    configs_weight = torch.repeat_interleave(
+        ref.weight, ref.ptr[1:] - ref.ptr[:-1]
+    ).unsqueeze(-1)
+    configs_valence_charges_weight = torch.repeat_interleave(
+        ref.valence_charges_weight, ref.ptr[1:] - ref.ptr[:-1]
+    ).unsqueeze(-1)
+    raw_loss = (
+        configs_weight
+        * configs_valence_charges_weight
+        * torch.square(ref["valence_charges"] - pred["valence_charges"])
+    )
+    return reduce_loss(raw_loss, ddp)
+
 
 def mean_squared_error_atomic_dipoles(
     ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
@@ -662,7 +681,8 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
             energy_weight=1.0,
             forces_weight=1.0,
             valence_widths_weight=1.0,
-            charges_weight=1.0,
+            core_charges_weight=1.0,
+            valence_charges_weight=1.0,
             atomic_dipoles_weight=1.0
     ) -> None:
         super().__init__()
@@ -679,8 +699,12 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
             torch.tensor(valence_widths_weight, dtype=torch.get_default_dtype()),
         )
         self.register_buffer(
-            "charges_weight",
-            torch.tensor(charges_weight, dtype=torch.get_default_dtype()),
+            "core_charges_weight",
+            torch.tensor(core_charges_weight, dtype=torch.get_default_dtype()),
+        )
+        self.register_buffer(
+            "valence_charges_weight",
+            torch.tensor(valence_charges_weight, dtype=torch.get_default_dtype()),
         )
         self.register_buffer(
             "atomic_dipoles_weight",
@@ -693,13 +717,15 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
         loss_energy = weighted_mean_squared_error_energy(ref, pred, ddp)
         loss_forces = mean_squared_error_forces(ref, pred, ddp)
         loss_valence_widths = mean_squared_error_valence_widths(ref, pred, ddp)
-        loss_charges = mean_squared_error_charges(ref, pred, ddp)
+        loss_core_charges = mean_squared_error_core_charges(ref, pred, ddp)
+        loss_valence_charges = mean_squared_error_valence_charges(ref, pred, ddp)
         loss_atomic_dipoles = mean_squared_error_atomic_dipoles(ref, pred, ddp)
         return (
             self.energy_weight * loss_energy
             + self.forces_weight * loss_forces
             + self.valence_widths_weight * loss_valence_widths
-            + self.charges_weight * loss_charges
+            + self.core_charges_weight * loss_core_charges
+            + self.valence_charges_weight * loss_valence_charges
             + self.atomic_dipoles_weight * loss_atomic_dipoles
         )
 
@@ -708,7 +734,8 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
             f"{self.__class__.__name__}(energy_weight={self.energy_weight:.3f}, "
             f"forces_weight={self.forces_weight:.3f}, "
             f"valence_widths_weight={self.valence_widths_weight:.3f}), "
-            f"charges_weight={self.charges_weight:.3f}), "
+            f"core_charges_weight={self.core_charges_weight:.3f}), "
+            f"valence_charges_weight={self.valence_charges_weight:.3f}), "
             f"atomic_dipoles_weight={self.atomic_dipoles_weight:.3f})"
         )
 
