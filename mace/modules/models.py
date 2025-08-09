@@ -1560,6 +1560,7 @@ class EnergyMBISMACE(torch.nn.Module):
         data["node_attrs"].requires_grad_(True)
         data["positions"].requires_grad_(True)
         num_graphs = data["ptr"].numel() - 1
+        num_atoms = data["ptr"][1:] - data["ptr"][:-1]
         num_atoms_arange = torch.arange(data["positions"].shape[0])
         displacement = torch.zeros(
             (num_graphs, 3, 3),
@@ -1649,6 +1650,12 @@ class EnergyMBISMACE(torch.nn.Module):
         )  # [n_nodes,3,n_contributions]
         valence_widths = torch.sum(contributions_valence_widths, dim=-1)  # [n_nodes]
         charges = torch.sum(contributions_charges, dim=-1)  # [n_nodes]
+
+        total_charge_excess = scatter_mean(
+            src=charges, index=data["batch"], dim_size=num_graphs
+        ) - (data["total_charge"] / num_atoms)
+        charges = charges - total_charge_excess[data["batch"]]
+
         atomic_dipoles = torch.sum(contributions_atomic_dipoles, dim=-1)  # [n_nodes,3]
 
         forces, virials, stress, _, _ = get_outputs(
