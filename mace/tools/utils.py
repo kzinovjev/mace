@@ -205,3 +205,59 @@ def filter_nonzero_weight(
 
     quantity_l[-1] = filtered_q
     return 1.0
+
+
+def pad_to_shape(tensor, shape, value=0):
+    """
+    Pad an array to a given shape.
+
+    Parameters
+    ----------
+
+    tensor : torch.Tensor
+        The array to pad.
+
+    shape : tuple
+        The desired shape of the array.
+
+    value : float, optional
+        The value to use for padding.
+
+    Returns
+    -------
+
+    padded_array : torch.Tensor
+        The padded array.
+    """
+    pad = [p for m, s in reversed(list(zip(shape, tensor.shape)))
+           for p in [0, int(m - s)]]
+    return torch.nn.functional.pad(tensor, pad, value=value)
+
+
+def pad_to_max(tensors, value=0):
+    """
+    Pad arrays to the size of the largest array along each axis.
+
+    Parameters
+    ----------
+
+    tensors : List[torch.Tensor]
+        The arrays to pad.
+
+    value : float, optional
+        The value to use for padding.
+
+    Returns
+    -------
+
+    padded_arrays : torch.Tensor
+        The padded arrays.
+    """
+    shape = torch.max(torch.Tensor([_.shape for _ in tensors]), dim=0).values
+    return torch.stack([pad_to_shape(_, shape, value) for _ in tensors])
+
+
+def flat_to_padded(flat_tensor, ptr, value=0):
+    tensors = [flat_tensor[first:last] for first, last
+               in zip(ptr[:-1], ptr[1:])]
+    return pad_to_max(tensors, value)

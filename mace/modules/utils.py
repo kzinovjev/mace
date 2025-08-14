@@ -12,11 +12,18 @@ import torch
 import torch.utils.data
 from scipy.constants import c, e
 
-from mace.tools import to_numpy
+from mace.tools import to_numpy, TensorDict
 from mace.tools.scatter import scatter_mean, scatter_std, scatter_sum
 from mace.tools.torch_geometric.batch import Batch
 
 from .blocks import AtomicEnergiesBlock
+
+from mace.tools.utils import flat_to_padded
+
+from emle.models._emle_base import EMLEBase
+from emle.train._loss import TholeLoss
+from emle._units import _ANGSTROM_TO_BOHR
+
 
 
 def compute_forces(
@@ -638,3 +645,19 @@ def prepare_graph(
         node_heads=node_heads,
         interaction_kwargs=ikw,
     )
+
+
+def compute_molecular_polarizabilities(batch: Batch, output: TensorDict):
+
+    mask = flat_to_padded(torch.ones_like(batch.batch, dtype=torch.bool), batch.ptr)
+
+    positions_mol = flat_to_padded(batch.positions, batch.ptr)
+
+    r_data = EMLEBase._get_r_data(positions_mol * _ANGSTROM_TO_BOHR, mask)
+    s = flat_to_padded(output["valence_widths"], batch.ptr) * mask
+    q_val = flat_to_padded(output["valence_charges"], batch.ptr) * mask
+    k = flat_to_padded(output["alpha_v_ratios"], batch.ptr) * mask
+
+    A_thole = EMLEBase._get_A_thole(r_data, s, q_val, k, output["a_Thole"])
+
+    return TholeLoss._get_alpha_mol(A_thole, mask)

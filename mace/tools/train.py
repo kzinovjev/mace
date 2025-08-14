@@ -37,6 +37,8 @@ from .utils import (
     filter_nonzero_weight,
 )
 
+from mace.modules.utils import compute_molecular_polarizabilities
+
 
 @dataclasses.dataclass
 class SWAContainer:
@@ -151,13 +153,15 @@ def valid_err_log(
         error_q_core = eval_metrics["rmse_emle_q_core"]
         error_q = eval_metrics["rmse_emle_q"]
         error_mu = eval_metrics["rmse_emle_mu"]
+        error_alpha = eval_metrics["rmse_emle_alpha"]
         logging.info(
             f"{inintial_phrase}: head: {valid_loader_name}, loss={valid_loss:8.8f}, "
             f"RMSE_E_per_atom={error_e:8.2f} meV, RMSE_F={error_f:8.2f} meV / A, "
             f"RMSE_emle_s={error_s:7.4f} A, "
             f"RMSE_emle_q_core={error_q_core:7.4f} e, "
             f"RMSE_emle_q={error_q:7.4f} e, "
-            f"RMSE_emle_mu={error_mu:7.4f} q * A"
+            f"RMSE_emle_mu={error_mu:7.4f} q * A",
+            f"RMSE_emle_alpha={error_alpha:7.3f} q * A"
         )
 
 
@@ -618,6 +622,9 @@ class MACELoss(Metric):
         self.add_state("atomic_dipoles_computed", default=torch.tensor(0.0), dist_reduce_fx="sum")
         self.add_state("atomic_dipoles", default=[], dist_reduce_fx="cat")
         self.add_state("delta_atomic_dipoles", default=[], dist_reduce_fx="cat")
+        self.add_state("emle_polarizabilities_computed", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("emle_polarizabilities", default=[], dist_reduce_fx="cat")
+        self.add_state("delta_emle_polarizabilities", default=[], dist_reduce_fx="cat")
         self.add_state(
             "polarizability_computed", default=torch.tensor(0.0), dist_reduce_fx="sum"
         )
@@ -693,6 +700,11 @@ class MACELoss(Metric):
             self.atomic_dipoles_computed += 1.0
             self.atomic_dipoles.append(batch.atomic_dipoles)
             self.delta_atomic_dipoles.append(batch.atomic_dipoles - output["atomic_dipoles"])
+        if output.get("a_Thole") is not None and batch.polarizability is not None:
+            self.emle_polarizabilities_computed += 1.0
+            alpha_pred = compute_molecular_polarizabilities(batch, output)
+            self.emle_polarizabilities.append(batch.polarizability)
+            self.delta_emle_polarizabilities.append(batch.polarizability - alpha_pred)
         if (
             output.get("polarizability") is not None
             and batch.polarizability is not None
@@ -793,6 +805,11 @@ class MACELoss(Metric):
             delta_atomic_dipoles = self.convert(self.delta_atomic_dipoles)
             aux['rmse_emle_mu'] = compute_rmse(delta_atomic_dipoles)
             aux['rel_rmse_emle_mu'] = compute_rel_rmse(delta_atomic_dipoles, atomic_dipoles)
+        if self.emle_polarizabilities_computed:
+            emle_polarizabilities = self.convert(self.emle_polarizabilities)
+            delta_emle_polarizabilities = self.convert(self.delta_emle_polarizabilities)
+            aux['rmse_emle_alpha'] = compute_rmse(delta_emle_polarizabilities)
+            aux['rel_rmse_emle_alpha'] = compute_rel_rmse(delta_emle_polarizabilities, emle_polarizabilities)
         if self.polarizability_computed:
             delta_polarizability = self.convert(self.delta_polarizability)
             delta_polarizability_per_atom = self.convert(

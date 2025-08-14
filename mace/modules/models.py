@@ -1544,6 +1544,10 @@ class EnergyEMLEMACE(torch.nn.Module):
                 self.readouts.append(
                     LinearEMLEReadoutBlock(hidden_irreps)
                 )
+        self.a_Thole = torch.nn.Parameter(torch.tensor(2., dtype=torch.float64))
+        self.elements_alpha_v_ratios = torch.nn.Parameter(
+            torch.ones(num_elements, dtype=torch.float64) * 0.1
+        )
 
     def forward(
         self,
@@ -1557,6 +1561,8 @@ class EnergyEMLEMACE(torch.nn.Module):
         compute_atomic_stresses: bool = False,  # pylint: disable=W0613
     ) -> Dict[str, Optional[torch.Tensor]]:
         # Setup
+        if training:
+            self.elements_alpha_v_ratios.requires_grad_(True)
         data["node_attrs"].requires_grad_(True)
         data["positions"].requires_grad_(True)
         num_graphs = data["ptr"].numel() - 1
@@ -1664,6 +1670,8 @@ class EnergyEMLEMACE(torch.nn.Module):
 
         atomic_dipoles = torch.sum(contributions_atomic_dipoles, dim=-1)  # [n_nodes,3]
 
+        alpha_v_ratios = data["node_attrs"] @ self.elements_alpha_v_ratios
+
         forces, virials, stress, _, _ = get_outputs(
             energy=total_energy,
             positions=data["positions"],
@@ -1687,5 +1695,7 @@ class EnergyEMLEMACE(torch.nn.Module):
             "core_charges": core_charges,
             "charges": charges,
             "atomic_dipoles": atomic_dipoles,
+            "a_Thole": self.a_Thole,
+            "alpha_v_ratios": alpha_v_ratios
         }
         return output

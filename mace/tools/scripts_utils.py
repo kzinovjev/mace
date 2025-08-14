@@ -646,7 +646,8 @@ def get_loss_fn(
             valence_widths_weight=args.valence_widths_weight,
             core_charges_weight=args.core_charges_weight,
             charges_weight=args.charges_weight,
-            atomic_dipoles_weight=args.atomic_dipoles_weight
+            atomic_dipoles_weight=args.atomic_dipoles_weight,
+            polarizability_weight=args.polarizability_weight
         )
     else:
         loss_fn = modules.WeightedEnergyForcesLoss(energy_weight=1.0, forces_weight=1.0)
@@ -724,7 +725,8 @@ def get_swa(
             valence_widths_weight=args.valence_widths_weight,
             core_charges_weight=args.core_charges_weight,
             charges_weight=args.charges_weight,
-            atomic_dipoles_weight=args.atomic_dipoles_weight
+            atomic_dipoles_weight=args.atomic_dipoles_weight,
+            polarizability_weight=args.polarizability_weight
         )
         logging.info(
             f"Stage Two (after {args.start_swa} epochs) with loss function: {loss_fn_energy}, with energy weight : {args.swa_energy_weight}, forces weight : {args.swa_forces_weight} and learning rate : {args.swa_lr}"
@@ -815,6 +817,15 @@ def get_params_options(
             {
                 "name": "les_readouts",
                 "params": model.les_readouts.parameters(),
+                "weight_decay": 0.0,
+            }
+        )
+
+    if hasattr(model, "a_Thole"):
+        param_options["params"].append(
+            {
+                "name": "emle",
+                "params": [model.a_Thole, model.elements_alpha_v_ratios],
                 "weight_decay": 0.0,
             }
         )

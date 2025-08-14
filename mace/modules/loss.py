@@ -12,6 +12,8 @@ import torch.distributed as dist
 from mace.tools import TensorDict
 from mace.tools.torch_geometric import Batch
 
+from mace.modules.utils import compute_molecular_polarizabilities
+
 
 # ------------------------------------------------------------------------------
 # Helper function for loss reduction that handles DDP correction
@@ -228,6 +230,27 @@ def mean_squared_error_atomic_dipoles(
         * configs_atomic_dipoles_weight
         * torch.square(ref["atomic_dipoles"] - pred["atomic_dipoles"])
     )
+    return reduce_loss(raw_loss, ddp)
+
+
+def mean_squared_error_emle_polarizability(
+    ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
+) -> torch.Tensor:
+
+    alpha_ref = ref["polarizability"]
+
+    if (torch.min(pred["valence_widths"]) < 0.3 or
+        torch.max(pred["valence_widths"]) > 1 or
+        torch.max(pred["valence_charges"]) > -0.5):
+        alpha_pred = torch.zeros_like(alpha_ref)
+    else:
+        alpha_pred = compute_molecular_polarizabilities(ref, pred)
+
+    triu_row, triu_col = torch.triu_indices(3, 3, offset=0)
+    alpha_ref_triu = alpha_ref[:, triu_row, triu_col]
+    alpha_pred_triu = alpha_pred[:, triu_row, triu_col]
+
+    raw_loss = torch.square(alpha_ref_triu - alpha_pred_triu)
     return reduce_loss(raw_loss, ddp)
 
 
@@ -683,7 +706,8 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
             valence_widths_weight=1.0,
             core_charges_weight=1.0,
             charges_weight=1.0,
-            atomic_dipoles_weight=1.0
+            atomic_dipoles_weight=1.0,
+            polarizability_weight=10.0
     ) -> None:
         super().__init__()
         self.register_buffer(
@@ -710,6 +734,10 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
             "atomic_dipoles_weight",
             torch.tensor(atomic_dipoles_weight, dtype=torch.get_default_dtype()),
         )
+        self.register_buffer(
+            "polarizability_weight",
+            torch.tensor(polarizability_weight, dtype=torch.get_default_dtype()),
+        )
 
     def forward(
         self, ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
@@ -720,6 +748,8 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
         loss_core_charges = mean_squared_error_core_charges(ref, pred, ddp)
         loss_charges = mean_squared_error_charges(ref, pred, ddp)
         loss_atomic_dipoles = mean_squared_error_atomic_dipoles(ref, pred, ddp)
+        loss_polarizability = mean_squared_error_emle_polarizability(ref, pred, ddp)
+
         return (
             self.energy_weight * loss_energy
             + self.forces_weight * loss_forces
@@ -727,6 +757,7 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
             + self.core_charges_weight * loss_core_charges
             + self.charges_weight * loss_charges
             + self.atomic_dipoles_weight * loss_atomic_dipoles
+            + self.polarizability_weight * loss_polarizability
         )
 
     def __repr__(self):

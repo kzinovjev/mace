@@ -110,12 +110,14 @@ error_type = {
             ("rmse_emle_q_core", "RMSE q/atom [e]"),
             ("rmse_emle_q", "RMSE q/atom [e]"),
             ("rmse_emle_mu", "RMSE mu/atom [e * A]"),
+            ("rmse_emle_alpha", "RMSE alpha/mol [bohr^3]"),
 
         ],
         [
             ("Valence width", "Atomic valence width [A]"),
             ("Atomic charge", "Atomic charge [e]"),
             ("Atomic dipole", "Atomic dipole [e * A]"),
+            ("Molecular polarizability", "Molecular polarizability [bohr^3]"),
         ],
     )
 }

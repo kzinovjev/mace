@@ -161,6 +161,7 @@ def plot(
         "rmse_emle_q_core": "RMSE q_core/atom [e]",
         "rmse_emle_q": "RMSE q/atom [e]",
         "rmse_emle_mu": "RMSE MU/atom [e * A]",
+        "rmse_emle_alpha": "RMSE alpha/mol [bohr^3]",
     }
 
     data = data[data["epoch"] > min_epoch]

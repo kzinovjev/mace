@@ -289,6 +289,8 @@ def create_error_table(
                     f"{metrics['rel_rmse_emle_q']:8.1f}",
                     f"{metrics['rmse_emle_mu']:8.4f}",
                     f"{metrics['rel_rmse_emle_mu']:8.1f}",
+                    f"{metrics['rmse_emle_alpha']:8.4f}",
+                    f"{metrics['rel_rmse_emle_alpha']:8.1f}",
                 ]
             )
     return table
