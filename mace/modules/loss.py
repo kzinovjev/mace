@@ -733,9 +733,9 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
         return (
             f"{self.__class__.__name__}(energy_weight={self.energy_weight:.3f}, "
             f"forces_weight={self.forces_weight:.3f}, "
-            f"valence_widths_weight={self.valence_widths_weight:.3f}), "
-            f"core_charges_weight={self.core_charges_weight:.3f}), "
-            f"valence_charges_weight={self.valence_charges_weight:.3f}), "
+            f"valence_widths_weight={self.valence_widths_weight:.3f}, "
+            f"core_charges_weight={self.core_charges_weight:.3f}, "
+            f"valence_charges_weight={self.valence_charges_weight:.3f}, "
             f"atomic_dipoles_weight={self.atomic_dipoles_weight:.3f})"
         )
 
