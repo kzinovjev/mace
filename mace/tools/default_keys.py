@@ -13,7 +13,6 @@ class DefaultKeys(Enum):
     HEAD = "head"
     VALENCE_WIDTHS = "REF_valence_widths"
     CORE_CHARGES = "REF_core_charges"
-    VALENCE_CHARGES = "REF_valence_charges"
     CHARGES = "REF_charges"
     ATOMIC_DIPOLES = "REF_atomic_dipoles"
     TOTAL_CHARGE = "total_charge"

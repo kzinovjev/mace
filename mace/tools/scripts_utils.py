@@ -645,7 +645,7 @@ def get_loss_fn(
             forces_weight=args.forces_weight,
             valence_widths_weight=args.valence_widths_weight,
             core_charges_weight=args.core_charges_weight,
-            valence_charges_weight=args.valence_charges_weight,
+            charges_weight=args.charges_weight,
             atomic_dipoles_weight=args.atomic_dipoles_weight
         )
     else:
@@ -723,7 +723,7 @@ def get_swa(
             forces_weight=args.swa_forces_weight,
             valence_widths_weight=args.valence_widths_weight,
             core_charges_weight=args.core_charges_weight,
-            valence_charges_weight=args.valence_charges_weight,
+            charges_weight=args.charges_weight,
             atomic_dipoles_weight=args.atomic_dipoles_weight
         )
         logging.info(

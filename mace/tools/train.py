@@ -149,14 +149,14 @@ def valid_err_log(
         error_f = eval_metrics["rmse_f"] * 1e3
         error_s = eval_metrics["rmse_emle_s"]
         error_q_core = eval_metrics["rmse_emle_q_core"]
-        error_q_val = eval_metrics["rmse_emle_q_val"]
+        error_q = eval_metrics["rmse_emle_q"]
         error_mu = eval_metrics["rmse_emle_mu"]
         logging.info(
             f"{inintial_phrase}: head: {valid_loader_name}, loss={valid_loss:8.8f}, "
             f"RMSE_E_per_atom={error_e:8.2f} meV, RMSE_F={error_f:8.2f} meV / A, "
             f"RMSE_emle_s={error_s:7.4f} A, "
             f"RMSE_emle_q_core={error_q_core:7.4f} e, "
-            f"RMSE_emle_q_val={error_q_val:7.4f} e, "
+            f"RMSE_emle_q={error_q:7.4f} e, "
             f"RMSE_emle_mu={error_mu:7.4f} q * A"
         )
 
@@ -612,9 +612,9 @@ class MACELoss(Metric):
         self.add_state("core_charges_computed", default=torch.tensor(0.0), dist_reduce_fx="sum")
         self.add_state("core_charges", default=[], dist_reduce_fx="cat")
         self.add_state("delta_core_charges", default=[], dist_reduce_fx="cat")
-        self.add_state("valence_charges_computed", default=torch.tensor(0.0), dist_reduce_fx="sum")
-        self.add_state("valence_charges", default=[], dist_reduce_fx="cat")
-        self.add_state("delta_valence_charges", default=[], dist_reduce_fx="cat")
+        self.add_state("charges_computed", default=torch.tensor(0.0), dist_reduce_fx="sum")
+        self.add_state("charges", default=[], dist_reduce_fx="cat")
+        self.add_state("delta_charges", default=[], dist_reduce_fx="cat")
         self.add_state("atomic_dipoles_computed", default=torch.tensor(0.0), dist_reduce_fx="sum")
         self.add_state("atomic_dipoles", default=[], dist_reduce_fx="cat")
         self.add_state("delta_atomic_dipoles", default=[], dist_reduce_fx="cat")
@@ -685,10 +685,10 @@ class MACELoss(Metric):
             self.core_charges_computed += 1.0
             self.core_charges.append(batch.core_charges)
             self.delta_core_charges.append(batch.core_charges - output["core_charges"])
-        if output.get("valence_charges") is not None and batch.valence_charges is not None:
-            self.valence_charges_computed += 1.0
-            self.valence_charges.append(batch.valence_charges)
-            self.delta_valence_charges.append(batch.valence_charges - output["valence_charges"])
+        if output.get("charges") is not None and batch.charges is not None:
+            self.charges_computed += 1.0
+            self.charges.append(batch.charges)
+            self.delta_charges.append(batch.charges - output["charges"])
         if output.get("atomic_dipoles") is not None and batch.atomic_dipoles is not None:
             self.atomic_dipoles_computed += 1.0
             self.atomic_dipoles.append(batch.atomic_dipoles)
@@ -783,11 +783,11 @@ class MACELoss(Metric):
             delta_core_charges = self.convert(self.delta_core_charges)
             aux['rmse_emle_q_core'] = compute_rmse(delta_core_charges)
             aux['rel_rmse_emle_q_core'] = compute_rel_rmse(delta_core_charges, core_charges)
-        if self.valence_charges_computed:
-            valence_charges = self.convert(self.valence_charges)
-            delta_valence_charges = self.convert(self.delta_valence_charges)
-            aux['rmse_emle_q_val'] = compute_rmse(delta_valence_charges)
-            aux['rel_rmse_emle_q_val'] = compute_rel_rmse(delta_valence_charges, valence_charges)
+        if self.charges_computed:
+            charges = self.convert(self.charges)
+            delta_charges = self.convert(self.delta_charges)
+            aux['rmse_emle_q'] = compute_rmse(delta_charges)
+            aux['rel_rmse_emle_q'] = compute_rel_rmse(delta_charges, charges)
         if self.atomic_dipoles_computed:
             atomic_dipoles = self.convert(self.atomic_dipoles)
             delta_atomic_dipoles = self.convert(self.delta_atomic_dipoles)

@@ -117,8 +117,8 @@ def create_error_table(
             "rel RMSE s/atom [A]",
             "RMSE q_core/atom [e]",
             "rel RMSE q_core/atom [e]",
-            "RMSE q_val/atom [e]",
-            "rel RMSE q_val/atom [e]",
+            "RMSE q/atom [e]",
+            "rel RMSE q/atom [e]",
             "RMSE mu/atom [e * A]",
             "rel RMSE mu/atom [e * A]"
         ]
@@ -285,8 +285,8 @@ def create_error_table(
                     f"{metrics['rel_rmse_emle_s']:8.1f}",
                     f"{metrics['rmse_emle_q_core']:8.4f}",
                     f"{metrics['rel_rmse_emle_q_core']:8.1f}",
-                    f"{metrics['rmse_emle_q_val']:8.4f}",
-                    f"{metrics['rel_rmse_emle_q_val']:8.1f}",
+                    f"{metrics['rmse_emle_q']:8.4f}",
+                    f"{metrics['rel_rmse_emle_q']:8.1f}",
                     f"{metrics['rmse_emle_mu']:8.4f}",
                     f"{metrics['rel_rmse_emle_mu']:8.1f}",
                 ]

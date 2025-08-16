@@ -108,7 +108,7 @@ error_type = {
         [
             ("rmse_emle_s", "RMSE s/atom [A]"),
             ("rmse_emle_q_core", "RMSE q/atom [e]"),
-            ("rmse_emle_q_val", "RMSE q/atom [e]"),
+            ("rmse_emle_q", "RMSE q/atom [e]"),
             ("rmse_emle_mu", "RMSE mu/atom [e * A]"),
 
         ],

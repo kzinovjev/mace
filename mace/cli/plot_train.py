@@ -159,7 +159,7 @@ def plot(
         "rmse_mu_per_atom": "RMSE MU/atom [mDebye]",
         "rmse_emle_s": "RMSE s/atom [A]",
         "rmse_emle_q_core": "RMSE q_core/atom [e]",
-        "rmse_emle_q_val": "RMSE q_val/atom [e]",
+        "rmse_emle_q": "RMSE q/atom [e]",
         "rmse_emle_mu": "RMSE MU/atom [e * A]",
     }
 

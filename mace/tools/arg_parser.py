@@ -593,12 +593,6 @@ def build_default_arg_parser() -> argparse.ArgumentParser:
         default=DefaultKeys.CORE_CHARGES.value,
     )
     parser.add_argument(
-        "--valence_charges_key",
-        help="Key of valence atomic charges in training xyz",
-        type=str,
-        default=DefaultKeys.VALENCE_CHARGES.value,
-    )
-    parser.add_argument(
         "--charges_key",
         help="Key of atomic charges in training xyz",
         type=str,
@@ -731,9 +725,6 @@ def build_default_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--core_charges_weight", help="weight of core charges loss", type=float, default=1.0
-    )
-    parser.add_argument(
-        "--valence_charges_weight", help="weight of valence charges loss", type=float, default=1.0
     )
     parser.add_argument(
         "--charges_weight", help="weight of charges loss", type=float, default=1.0
@@ -1108,12 +1099,6 @@ def build_preprocess_arg_parser() -> argparse.ArgumentParser:
         help="Key of core atomic charges in training xyz",
         type=str,
         default=DefaultKeys.CORE_CHARGES.value,
-    )
-    parser.add_argument(
-        "--valence_charges_key",
-        help="Key of valence atomic charges in training xyz",
-        type=str,
-        default=DefaultKeys.VALENCE_CHARGES.value,
     )
     parser.add_argument(
         "--polarizability_key",
