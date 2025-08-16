@@ -107,6 +107,21 @@ def create_error_table(
             "RMSE MU / mDebye / atom",
             "rel MU RMSE %",
         ]
+    elif table_type == "EnergyEMLERMSE":
+        table.field_names = [
+            "config_type",
+            "RMSE E / meV / atom",
+            "RMSE F / meV / A",
+            "rel F RMSE %",
+            "RMSE s/atom [A]",
+            "rel RMSE s/atom [A]",
+            "RMSE q_core/atom [e]",
+            "rel RMSE q_core/atom [e]",
+            "RMSE q_val/atom [e]",
+            "rel RMSE q_val/atom [e]",
+            "RMSE mu/atom [e * A]",
+            "rel RMSE mu/atom [e * A]"
+        ]
 
     for name in sorted(all_data_loaders, key=custom_key):
         if any(skip_head in name for skip_head in skip_heads):
