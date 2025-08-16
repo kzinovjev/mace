@@ -717,6 +717,18 @@ def get_swa(
         logging.info(
             f"Stage Two (after {args.start_swa} epochs) with loss function: {loss_fn_energy}, with energy weight : {args.swa_energy_weight}, forces weight : {args.swa_forces_weight}, stress weight : {args.swa_stress_weight} and learning rate : {args.swa_lr}"
         )
+    elif args.loss == "energy_emle":
+        loss_fn_energy = modules.WeightedEnergyForcesEMLELoss(
+            energy_weight=args.swa_energy_weight,
+            forces_weight=args.swa_forces_weight,
+            valence_widths_weight=args.valence_widths_weight,
+            core_charges_weight=args.core_charges_weight,
+            valence_charges_weight=args.valence_charges_weight,
+            atomic_dipoles_weight=args.atomic_dipoles_weight
+        )
+        logging.info(
+            f"Stage Two (after {args.start_swa} epochs) with loss function: {loss_fn_energy}, with energy weight : {args.swa_energy_weight}, forces weight : {args.swa_forces_weight} and learning rate : {args.swa_lr}"
+        )
     else:
         loss_fn_energy = modules.WeightedEnergyForcesLoss(
             energy_weight=args.swa_energy_weight,
