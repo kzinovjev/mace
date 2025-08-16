@@ -655,7 +655,7 @@ def compute_molecular_polarizabilities(batch: Batch, output: TensorDict):
 
     r_data = EMLEBase._get_r_data(positions_mol * _ANGSTROM_TO_BOHR, mask)
     s = flat_to_padded(output["valence_widths"], batch.ptr) * mask
-    q_val = flat_to_padded(output["valence_charges"], batch.ptr) * mask
+    q_val = flat_to_padded(output["charges"] - output["core_charges"], batch.ptr) * mask
     k = flat_to_padded(output["alpha_v_ratios"], batch.ptr) * mask
 
     A_thole = EMLEBase._get_A_thole(r_data, s, q_val, k, output["a_Thole"])

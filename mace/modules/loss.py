@@ -239,9 +239,11 @@ def mean_squared_error_emle_polarizability(
 
     alpha_ref = ref["polarizability"]
 
+    valence_charges = pred["charges"] - pred["core_charges"]
+
     if (torch.min(pred["valence_widths"]) < 0.3 or
         torch.max(pred["valence_widths"]) > 1 or
-        torch.max(pred["valence_charges"]) > -0.5):
+        torch.max(valence_charges) > -0.5):
         alpha_pred = torch.zeros_like(alpha_ref)
     else:
         alpha_pred = compute_molecular_polarizabilities(ref, pred)
