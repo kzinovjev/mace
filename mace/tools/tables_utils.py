@@ -120,7 +120,9 @@ def create_error_table(
             "RMSE q/atom [e]",
             "rel RMSE q/atom [e]",
             "RMSE mu/atom [e * A]",
-            "rel RMSE mu/atom [e * A]"
+            "rel RMSE mu/atom [e * A]",
+            "RMSE alpha/mol [bohr^3]",
+            "rel RMSE alpha/mol [bohr^3]"
         ]
 
     for name in sorted(all_data_loaders, key=custom_key):
