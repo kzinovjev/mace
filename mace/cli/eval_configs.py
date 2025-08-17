@@ -18,6 +18,8 @@ from mace.cli.convert_e3nn_cueq import run as run_e3nn_to_cueq
 from mace.modules.utils import extract_invariant
 from mace.tools import torch_geometric, torch_tools, utils
 
+from mace.modules.utils import compute_molecular_polarizabilities
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -195,6 +197,7 @@ def run(args: argparse.Namespace) -> None:
     core_charges_list = []
     charges_list = []
     atomic_dipoles_list = []
+    polarizabilities_list = []
 
     for batch in data_loader:
         batch = batch.to(device)
@@ -305,6 +308,9 @@ def run(args: argparse.Namespace) -> None:
                     :-1
                 ]  # drop last as its empty
             )
+            polarizabilities_list.append(
+                torch_tools.to_numpy(compute_molecular_polarizabilities(batch, output))
+            )
 
         forces = np.split(
             torch_tools.to_numpy(output["forces"]),
@@ -347,6 +353,7 @@ def run(args: argparse.Namespace) -> None:
         assert len(atoms_list) == charges.shape[0]
         atomic_dipoles = np.concatenate(atomic_dipoles_list, axis=0)
         assert len(atoms_list) == atomic_dipoles.shape[0]
+        polarizabilities = np.concatenate(polarizabilities_list, axis=0)
 
 
     # Store data in atoms objects
@@ -390,6 +397,7 @@ def run(args: argparse.Namespace) -> None:
             atoms.arrays[args.info_prefix + "core_charges"] = core_charges[i]
             atoms.arrays[args.info_prefix + "charges"] = charges[i]
             atoms.arrays[args.info_prefix + "atomic_dipoles"] = atomic_dipoles[i]
+            atoms.info[args.info_prefix + "polarizability"] = polarizabilities[i]
 
     # Write atoms to output path
     ase.io.write(args.output, images=atoms_list, format="extxyz")
