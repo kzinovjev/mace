@@ -157,11 +157,11 @@ def plot(
         "rmse_virials_per_atom": " RMSE virials/atom [meV]",
         "mae_virials": "MAE Virials [meV]",
         "rmse_mu_per_atom": "RMSE MU/atom [mDebye]",
-        "rmse_emle_s": "RMSE s/atom [A]",
-        "rmse_emle_q_core": "RMSE q_core/atom [e]",
-        "rmse_emle_q": "RMSE q/atom [e]",
-        "rmse_emle_mu": "RMSE MU/atom [e * A]",
-        "rmse_emle_alpha": "RMSE alpha/mol [bohr^3]",
+        "rmse_emle_s": "RMSE s [Bohr]",
+        "rmse_emle_q_core": "RMSE q_core [e]",
+        "rmse_emle_q": "RMSE q [e]",
+        "rmse_emle_mu": "RMSE MU [e * Bohr]",
+        "rmse_emle_alpha": "RMSE alpha [Bohr^3]",
     }
 
     data = data[data["epoch"] > min_epoch]
