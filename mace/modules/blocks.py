@@ -451,7 +451,6 @@ class EquivariantProductBasisBlock(torch.nn.Module):
         self.use_sc = use_sc
         self.use_agnostic_product = use_agnostic_product
         if self.use_agnostic_product:
-            print("Using agnostic product in EquivariantProductBasisBlock")
             num_elements = 1
         self.symmetric_contractions = SymmetricContractionWrapper(
             irreps_in=node_feats_irreps,
