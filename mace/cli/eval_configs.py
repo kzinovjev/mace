@@ -193,13 +193,14 @@ def run(args: argparse.Namespace) -> None:
     bec_list = []
     qs_list = []
     forces_collection = []
-    valence_widths_list = []
-    core_charges_list = []
-    charges_list = []
-    atomic_dipoles_list = []
+    valence_widths_collection = []
+    core_charges_collection = []
+    charges_collection = []
+    atomic_dipoles_collection = []
     polarizabilities_list = []
 
-    for batch in data_loader:
+    for ii, batch in enumerate(data_loader):
+        print(ii, len(data_loader))
         batch = batch.to(device)
         output = get_model_output(
             model, batch.to_dict(), args.compute_stress, args.compute_bec
@@ -271,7 +272,7 @@ def run(args: argparse.Namespace) -> None:
             )
 
         if args.return_emle:
-            valence_widths_list.append(
+            valence_widths_collection.append(
                 np.split(
                     torch_tools.to_numpy(output["valence_widths"]),
                     indices_or_sections=batch.ptr[1:],
@@ -281,7 +282,7 @@ def run(args: argparse.Namespace) -> None:
                 ]  # drop last as its empty
             )
 
-            core_charges_list.append(
+            core_charges_collection.append(
                 np.split(
                     torch_tools.to_numpy(output["core_charges"]),
                     indices_or_sections=batch.ptr[1:],
@@ -290,7 +291,7 @@ def run(args: argparse.Namespace) -> None:
                     :-1
                 ]  # drop last as its empty
             )
-            charges_list.append(
+            charges_collection.append(
                 np.split(
                     torch_tools.to_numpy(output["charges"]),
                     indices_or_sections=batch.ptr[1:],
@@ -299,7 +300,7 @@ def run(args: argparse.Namespace) -> None:
                 :-1
                 ]  # drop last as its empty
             )
-            atomic_dipoles_list.append(
+            atomic_dipoles_collection.append(
                 np.split(
                     torch_tools.to_numpy(output["atomic_dipoles"]),
                     indices_or_sections=batch.ptr[1:],
@@ -345,16 +346,35 @@ def run(args: argparse.Namespace) -> None:
         assert len(atoms_list) == node_energies.shape[0]
 
     if args.return_emle:
-        valence_widths = np.concatenate(valence_widths_list, axis=0)
-        assert len(atoms_list) == valence_widths.shape[0]
-        core_charges = np.concatenate(core_charges_list, axis=0)
-        assert len(atoms_list) == core_charges.shape[0]
-        charges = np.concatenate(charges_list, axis=0)
-        assert len(atoms_list) == charges.shape[0]
-        atomic_dipoles = np.concatenate(atomic_dipoles_list, axis=0)
-        assert len(atoms_list) == atomic_dipoles.shape[0]
-        polarizabilities = np.concatenate(polarizabilities_list, axis=0)
+        valence_widths_list = [
+            valence_widths 
+            for valence_widths_list in valence_widths_collection 
+            for valence_widths in valence_widths_list
+        ]
+        assert len(atoms_list) == len(valence_widths_list)
 
+        core_charges_list = [
+            core_charges 
+            for core_charges_list in core_charges_collection 
+            for core_charges in core_charges_list
+        ]
+        assert len(atoms_list) == len(core_charges_list)
+
+        charges_list = [
+            charges
+            for charges_list in charges_collection
+            for charges in charges_list
+        ]
+        assert len(atoms_list) == len(charges_list)
+
+        atomic_dipoles_list = [
+            atomic_dipoles
+            for atomic_dipoles_list in atomic_dipoles_collection
+            for atomic_dipoles in atomic_dipoles_list
+        ]
+        assert len(atoms_list) == len(atomic_dipoles_list)
+
+        polarizabilities = np.concatenate(polarizabilities_list, axis=0)
 
     # Store data in atoms objects
     for i, (atoms, energy, forces) in enumerate(zip(atoms_list, energies, forces_list)):
@@ -393,10 +413,10 @@ def run(args: argparse.Namespace) -> None:
             atoms.arrays[args.info_prefix + "node_energies"] = node_energies[i]
 
         if args.return_emle:
-            atoms.arrays[args.info_prefix + "valence_widths"] = valence_widths[i]
-            atoms.arrays[args.info_prefix + "core_charges"] = core_charges[i]
-            atoms.arrays[args.info_prefix + "charges"] = charges[i]
-            atoms.arrays[args.info_prefix + "atomic_dipoles"] = atomic_dipoles[i]
+            atoms.arrays[args.info_prefix + "valence_widths"] = valence_widths_list[i]
+            atoms.arrays[args.info_prefix + "core_charges"] = core_charges_list[i]
+            atoms.arrays[args.info_prefix + "charges"] = charges_list[i]
+            atoms.arrays[args.info_prefix + "atomic_dipoles"] = atomic_dipoles_list[i]
             atoms.info[args.info_prefix + "polarizability"] = polarizabilities[i]
 
     # Write atoms to output path
