@@ -1642,9 +1642,10 @@ class EnergyEMLEMACE(torch.nn.Module):
             node_charges_list.append(node_out[:, 3])
             node_atomic_dipoles_list.append(node_out[:, 4:])
 
-        # Compute the energies and dipoles
+        # Compute the energies and EMLE properties
         contributions = torch.stack(energies, dim=-1)
-        total_energy = torch.sum(contributions, dim=-1)  # [n_graphs, ]
+        interaction_energy = torch.sum(contributions[:, 1:], dim=-1)
+        total_energy = e0 + interaction_energy  # [n_graphs, ]
         node_energy_contributions = torch.stack(node_energies_list, dim=-1)
         node_energy = torch.sum(node_energy_contributions, dim=-1)  # [n_nodes, ]
         contributions_valence_widths = torch.stack(
@@ -1685,7 +1686,9 @@ class EnergyEMLEMACE(torch.nn.Module):
 
         output = {
             "energy": total_energy,
+            "e0": e0,
             "node_energy": node_energy,
+            "interaction_energy": interaction_energy,
             "contributions": contributions,
             "forces": forces,
             "virials": virials,
