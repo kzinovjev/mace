@@ -199,8 +199,7 @@ def run(args: argparse.Namespace) -> None:
     atomic_dipoles_collection = []
     polarizabilities_list = []
 
-    for ii, batch in enumerate(data_loader):
-        print(ii, len(data_loader))
+    for batch in data_loader:
         batch = batch.to(device)
         output = get_model_output(
             model, batch.to_dict(), args.compute_stress, args.compute_bec
