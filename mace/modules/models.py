@@ -1544,9 +1544,9 @@ class EnergyEMLEMACE(torch.nn.Module):
                 self.readouts.append(
                     LinearEMLEReadoutBlock(hidden_irreps)
                 )
-        self.a_Thole = torch.nn.Parameter(torch.tensor(2., dtype=torch.float64))
+        self.a_Thole = torch.nn.Parameter(torch.tensor(2., dtype=torch.get_default_dtype()))
         self.elements_alpha_v_ratios = torch.nn.Parameter(
-            torch.ones(num_elements, dtype=torch.float64) * 0.1
+            torch.ones(num_elements, dtype=torch.get_default_dtype()) * 0.1
         )
 
     def forward(
