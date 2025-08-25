@@ -161,6 +161,20 @@ def weighted_mean_squared_error_dipole(
 # EMLE Loss Functions
 # ------------------------------------------------------------------------------
 
+def weighted_mean_squared_error_interaction_energy(
+    ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
+) -> torch.Tensor:
+    # Calculate per-graph number of atoms.
+    num_atoms = ref.ptr[1:] - ref.ptr[:-1]  # shape: [n_graphs]
+    ref_interaction_energy = ref["energy"] - pred["e0"]
+    raw_loss = (
+        ref.weight
+        * ref.energy_weight
+        * torch.square((ref_interaction_energy - pred["interaction_energy"]) / num_atoms)
+    )
+    return reduce_loss(raw_loss, ddp)
+
+
 def mean_squared_error_valence_widths(
     ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
 ) -> torch.Tensor:
@@ -744,7 +758,7 @@ class WeightedEnergyForcesEMLELoss(torch.nn.Module):
     def forward(
         self, ref: Batch, pred: TensorDict, ddp: Optional[bool] = None
     ) -> torch.Tensor:
-        loss_energy = weighted_mean_squared_error_energy(ref, pred, ddp)
+        loss_energy = weighted_mean_squared_error_interaction_energy(ref, pred, ddp)
         loss_forces = mean_squared_error_forces(ref, pred, ddp)
         loss_valence_widths = mean_squared_error_valence_widths(ref, pred, ddp)
         loss_core_charges = mean_squared_error_core_charges(ref, pred, ddp)
