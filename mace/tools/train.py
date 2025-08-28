@@ -161,7 +161,7 @@ def valid_err_log(
             f"RMSE_emle_q_core={error_q_core:7.4f} e, "
             f"RMSE_emle_q={error_q:7.4f} e, "
             f"RMSE_emle_mu={error_mu:7.4f} q * Bohr, "
-            f"RMSE_emle_alpha={error_alpha:7.3f} q * Bohr"
+            f"RMSE_emle_alpha={error_alpha:7.3f} Bohr^3"
         )
 
 
