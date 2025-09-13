@@ -223,7 +223,7 @@ def print_git_commit():
 
 
 def extract_config_mace_model(model: torch.nn.Module) -> Dict[str, Any]:
-    if model.__class__.__name__ not in ["ScaleShiftMACE", "MACELES"]:
+    if model.__class__.__name__ not in ["ScaleShiftMACE", "MACELES", "EnergyEMLEMACE"]:
         return {"error": "Model is not a ScaleShiftMACE or MACELES model"}
 
     def radial_to_name(radial_type):
@@ -244,8 +244,12 @@ def extract_config_mace_model(model: torch.nn.Module) -> Dict[str, Any]:
             return "Soft"
         return radial.distance_transform.__class__.__name__
 
-    scale = model.scale_shift.scale
-    shift = model.scale_shift.shift
+    try:
+        scale = model.scale_shift.scale
+        shift = model.scale_shift.shift
+    except AttributeError:
+        scale = torch.tensor(1.)
+        shift = torch.tensor(0.)
     heads = model.heads if hasattr(model, "heads") else ["default"]
     model_mlp_irreps = (
         o3.Irreps(str(model.readouts[-1].hidden_irreps))
@@ -279,6 +283,7 @@ def extract_config_mace_model(model: torch.nn.Module) -> Dict[str, Any]:
             .non_linearity._modules["acts"][0]
             .f
             if model.num_interactions.item() > 1
+            and hasattr(model.readouts[-1], 'non_linearity')
             else None
         ),
         "use_reduced_cg": (
@@ -320,6 +325,18 @@ def extract_config_mace_model(model: torch.nn.Module) -> Dict[str, Any]:
         config["use_polarizability"] = model.use_polarizability
         config["only_dipole"] = False  # model.only_dipole
         config["gate"] = torch.nn.functional.silu
+
+    if model.__class__.__name__ == "EnergyEMLEMACE":
+        del config['use_agnostic_product']
+        del config['use_last_readout_only']
+        del config['use_embedding_readout']
+        del config['readout_cls']
+        del config['radial_type']
+        del config['embedding_specs']
+        del config['pair_repulsion']
+        del config['atomic_inter_scale']
+        del config['atomic_inter_shift']
+        del config['heads']
     return config
 
 
