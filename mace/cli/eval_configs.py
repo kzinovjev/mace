@@ -163,7 +163,8 @@ def run(args: argparse.Namespace) -> None:
     if args.head is not None:
         for atoms in atoms_list:
             atoms.info["head"] = args.head
-    configs = [data.config_from_atoms(atoms) for atoms in atoms_list]
+    key_spec = data.utils.KeySpecification(info_keys={'total_charge': 'total_charge'})
+    configs = [data.config_from_atoms(atoms, key_spec) for atoms in atoms_list]
 
     z_table = utils.AtomicNumberTable([int(z) for z in model.atomic_numbers])
 
