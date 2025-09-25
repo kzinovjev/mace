@@ -220,7 +220,7 @@ class NonLinearDipoleReadoutBlock(torch.nn.Module):
 
 
 @compile_mode("script")
-class LinearEMLEReadoutBlock(torch.nn.Module):
+class LinearEMLEReadoutBlock(torch.nn.Module): # Check if needed
     def __init__(
             self,
             irreps_in: o3.Irreps,
@@ -238,7 +238,7 @@ class LinearEMLEReadoutBlock(torch.nn.Module):
 
 
 @compile_mode("script")
-class NonLinearEMLEReadoutBlock(torch.nn.Module):
+class NonLinearEMLEReadoutBlock(torch.nn.Module): # Check if needed
     def __init__(
             self,
             irreps_in: o3.Irreps,

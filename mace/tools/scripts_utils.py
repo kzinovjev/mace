@@ -283,7 +283,6 @@ def extract_config_mace_model(model: torch.nn.Module) -> Dict[str, Any]:
             .non_linearity._modules["acts"][0]
             .f
             if model.num_interactions.item() > 1
-            and hasattr(model.readouts[-1], 'non_linearity')
             else None
         ),
         "use_reduced_cg": (
@@ -327,16 +326,16 @@ def extract_config_mace_model(model: torch.nn.Module) -> Dict[str, Any]:
         config["gate"] = torch.nn.functional.silu
 
     if model.__class__.__name__ == "EnergyEMLEMACE":
-        del config['use_agnostic_product']
-        del config['use_last_readout_only']
-        del config['use_embedding_readout']
-        del config['readout_cls']
-        del config['radial_type']
-        del config['embedding_specs']
-        del config['pair_repulsion']
+        # del config['use_agnostic_product']
+        # del config['use_last_readout_only']
+        # del config['use_embedding_readout']
+        # del config['readout_cls']
+        # del config['radial_type']
+        # del config['embedding_specs']
+        # del config['pair_repulsion']
         del config['atomic_inter_scale']
         del config['atomic_inter_shift']
-        del config['heads']
+        # del config['heads']
     return config
 
 
