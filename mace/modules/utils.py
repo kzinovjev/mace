@@ -660,4 +660,4 @@ def compute_molecular_polarizabilities(batch: Batch, output: TensorDict):
 
     A_thole = EMLEBase._get_A_thole(r_data, s, q_val, k, output["a_Thole"])
 
-    return TholeLoss._get_alpha_mol(A_thole, mask)
+    return TholeLoss._get_alpha_mol(A_thole, mask)[0]
